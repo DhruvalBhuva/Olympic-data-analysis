@@ -8,6 +8,7 @@ region_df = pd.read_csv('./Dataset/noc_regions.csv')
 
 df = preprocessing.preprocess(df, region_df)
 
+st.sidebar.title("Olympics Analysis")
 
 user_menu = st.sidebar.radio(
     "Select an option",
@@ -15,8 +16,24 @@ user_menu = st.sidebar.radio(
      "Country-wise Analysis", "Athlete-wise Analysis")
 )
 
-# st.dataframe(df)
 
 if user_menu == "Medal tally":
-    st.title("Medal Tally")
-    st.table(helper.medal_telly(df))
+    st.sidebar.header("Medal Tally")
+
+    years, country = helper.county_year_list(df)
+
+    selected_year = st.sidebar.selectbox("Select Year", years)
+    selected_country = st.sidebar.selectbox("Select Country", country)
+
+    medal_telly = helper.fetch_medal_tally(df, selected_year, selected_country)
+
+    if selected_year == "Overall" and selected_country == "Overall":
+        st.title("Overall Tally")
+    if selected_year != "Overall" and selected_country == "Overall":
+        st.title("Tally for " + str(selected_year) + " Olympics")
+    if selected_year == "Overall" and selected_country != "Overall":
+        st.title(selected_country + " overall performance")
+    if selected_year != "Overall" and selected_country != "Overall":
+        st.title(selected_country + " performance in " + str(selected_year))
+
+    st.table(medal_telly)

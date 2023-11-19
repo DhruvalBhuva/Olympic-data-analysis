@@ -2,7 +2,6 @@ import pandas as pd
 
 
 def preprocess(df, region_df):
-    global df, region_df
 
     # Filtering only the Summer Olympics
     df = df[df['Season'] == 'Summer']
