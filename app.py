@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
+import plotly.figure_factory as ff
 from appComponents import preprocessing, helper
 
 
@@ -113,8 +114,8 @@ if user_menu == "Overall Analysis":
 
     selected_sport = st.selectbox("Select a Sport", sport_list)
 
-    athlete_df = helper.most_successfull_athelete(df, selected_sport)
-    st.table(athlete_df)
+    athletes_df = helper.most_successfull_athelete(df, selected_sport)
+    st.table(athletes_df)
 
 if user_menu == "Country-wise Analysis":
     st.sidebar.title("Country-wise Analysis")
@@ -142,3 +143,47 @@ if user_menu == "Country-wise Analysis":
     top10_atheletes = helper.most_successfull_athelete_countrywise(
         df, selected_country)
     st.table(top10_atheletes)
+
+if user_menu == "Athlete-wise Analysis":
+
+    athletes_df = df.drop_duplicates(subset=["Name", "region"])
+
+    age = athletes_df["Age"].dropna()
+    gold_medalist = athletes_df[athletes_df["Medal"]
+                                == "Gold"]["Age"].dropna()
+    silver_medalist = athletes_df[athletes_df["Medal"]
+                                  == "Silver"]["Age"].dropna()
+    bronze_medalist = athletes_df[athletes_df["Medal"]
+                                  == "Bronze"]["Age"].dropna()
+
+    st.title("Distribution of Age")
+    fig = ff.create_distplot([age, gold_medalist, silver_medalist, bronze_medalist], [
+        "Overall Age", "Gold Medalist", "Silver Medalist", "Bronze Medalist"], show_hist=False, show_rug=False)
+    fig.update_layout(autosize=False, width=1000, height=600)
+    st.plotly_chart(fig)
+
+    st.title("Age Distribution on medal basis")
+    medals = ["Gold", "Silver", "Bronze"]
+    selected_medal = st.selectbox("Select a Medal Type", medals)
+
+    x = []
+    name = []
+    famous_sports = ['Basketball', 'Judo', 'Football', 'Tug-Of-War', 'Athletics',
+                     'Swimming', 'Badminton', 'Sailing', 'Gymnastics',
+                     'Art Competitions', 'Handball', 'Weightlifting', 'Wrestling',
+                     'Water Polo', 'Hockey', 'Rowing', 'Fencing',
+                     'Shooting', 'Boxing', 'Taekwondo', 'Cycling', 'Diving', 'Canoeing',
+                     'Tennis', 'Golf', 'Softball', 'Archery',
+                     'Volleyball', 'Synchronized Swimming', 'Table Tennis', 'Baseball',
+                     'Rhythmic Gymnastics', 'Rugby Sevens',
+                     'Beach Volleyball', 'Triathlon', 'Rugby', 'Polo', 'Ice Hockey']
+
+    for sport in famous_sports:
+        temp_df = athletes_df[athletes_df['Sport'] == sport]
+        x.append(temp_df[temp_df['Medal'] == selected_medal]['Age'].dropna())
+        name.append(sport)
+
+    fig = ff.create_distplot(x, name, show_hist=False, show_rug=False)
+    fig.update_layout(autosize=False, width=1000, height=600)
+    st.title("Distribution of Age wrt Sports(Gold Medalist)")
+    st.plotly_chart(fig)
